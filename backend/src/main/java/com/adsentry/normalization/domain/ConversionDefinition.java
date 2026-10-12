@@ -41,4 +41,24 @@ public enum ConversionDefinition {
         }
         return UNSPECIFIED;
     }
+
+    public static ConversionDefinition detectFromHeaderOrAction(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return UNSPECIFIED;
+        }
+        String clean = raw.trim().toLowerCase();
+        if (clean.contains("purchase") || clean.contains("order") || clean.contains("sale")) {
+            return PURCHASE;
+        }
+        if (clean.contains("lead")) {
+            return LEAD;
+        }
+        if (clean.contains("checkout")) {
+            return CHECKOUT_INITIATED;
+        }
+        if (clean.contains("messaging") || clean.contains("conversation")) {
+            return MESSAGING_CONVERSATION;
+        }
+        return UNSPECIFIED;
+    }
 }

@@ -62,7 +62,8 @@ class ConstraintsAndCascadeIntegrationTest {
 
         ImportedRecord record = new ImportedRecord();
         record.setBatch(batch);
-        record.setIdentityKey("META_ADS|campaign-1|2026-03-01|default|UNSPECIFIED");
+        record.setCampaignIdentityKey("META_ADS:NAME:campaign-1");
+        record.setIdentityKey("META_ADS:NAME:campaign-1|2026-03-01|default|UNSPECIFIED");
         record.setPlatform("META_ADS");
         record.setCampaignName("Campaign-1");
         record.setCampaignNameNormalized("campaign-1");

@@ -18,7 +18,10 @@ public class ImportedRecord {
     @JoinColumn(name = "batch_id", nullable = false)
     private ImportBatch batch;
 
-    @Column(name = "identity_key", nullable = false, length = 128)
+    @Column(name = "campaign_identity_key", nullable = false, length = 128)
+    private String campaignIdentityKey;
+
+    @Column(name = "identity_key", nullable = false, length = 255)
     private String identityKey;
 
     @Column(nullable = false, length = 50)
@@ -83,6 +86,14 @@ public class ImportedRecord {
 
     public void setBatch(ImportBatch batch) {
         this.batch = batch;
+    }
+
+    public String getCampaignIdentityKey() {
+        return campaignIdentityKey;
+    }
+
+    public void setCampaignIdentityKey(String campaignIdentityKey) {
+        this.campaignIdentityKey = campaignIdentityKey;
     }
 
     public String getIdentityKey() {

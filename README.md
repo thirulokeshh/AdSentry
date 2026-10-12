@@ -511,12 +511,15 @@ Set up Spring Boot, PostgreSQL, migrations, configuration, validation,
 API error handling, health endpoint, entities/repositories, and test
 setup.
 
-### Phase 2 --- Import pipeline
+### Phase 2 --- Import pipeline (COMPLETED)
 
-Implement safe CSV parsing, platform detection, mapping, validation,
-preview, confirmed partial import, row errors, provenance,
-deduplication, replacement, deletion, and restoration. Test before
-proceeding.
+Implemented safe RFC-4180 CSV parsing, automatic/manual column mapping, budget protection, platform detection, unambiguous date parsing, INR currency enforcement with plain-number confirmation, preview without database writes, confirmed partial import with row-level error reporting, stable campaign identity separation from record deduplication keys, atomic replacement, and newest-version winner selection with automatic restoration upon batch deletion.
+
+To run the reproducible PostgreSQL-backed integration test when a real PostgreSQL instance is available:
+```powershell
+mvn test -Dtest=PostgreSqlIntegrationTest -DPOSTGRES_TEST_URL="jdbc:postgresql://<host>:5432/<database>" -DPOSTGRES_TEST_USER="<user>" -DPOSTGRES_TEST_PASSWORD="<password>"
+```
+*(Note: Docker is not installed locally on this host environment, so automated Testcontainers execution is bypassed in favor of direct H2 PostgreSQL-compatibility mode for local testing and configurable `POSTGRES_TEST_URL` for CI/staging).*
 
 ### Phase 3 --- Analytics
 
@@ -570,16 +573,16 @@ remains.
 
 ### Import/data
 
--   [ ] Platform detection/confirmation works for supported formats.
--   [ ] Automatic mapping and manual correction work.
--   [ ] Preview shows mappings, dates, duplicates/conflicts, validation
+-   [x] Platform detection/confirmation works for supported formats.
+-   [x] Automatic mapping and manual correction work.
+-   [x] Preview shows mappings, dates, duplicates/conflicts, validation
     and coverage.
--   [ ] Partial imports show row-level errors.
--   [ ] Missing and zero remain distinct; INR-only behavior is enforced.
--   [ ] Every imported record has a valid date.
--   [ ] Import history can be inspected, replaced, and deleted.
--   [ ] Overlapping records do not double-count.
--   [ ] Deleting the winning batch restores the newest remaining
+-   [x] Partial imports show row-level errors.
+-   [x] Missing and zero remain distinct; INR-only behavior is enforced.
+-   [x] Every imported record has a valid date.
+-   [x] Import history can be inspected, replaced, and deleted.
+-   [x] Overlapping records do not double-count.
+-   [x] Deleting the winning batch restores the newest remaining
     version.
 
 ### Analytics/recommendations

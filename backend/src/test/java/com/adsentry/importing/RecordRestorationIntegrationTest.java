@@ -54,6 +54,7 @@ class RecordRestorationIntegrationTest {
 
         ImportedRecord record1 = new ImportedRecord();
         record1.setBatch(batch1);
+        record1.setCampaignIdentityKey("GOOGLE_ADS:NAME:brand-4");
         record1.setIdentityKey(identityKey);
         record1.setPlatform("GOOGLE_ADS");
         record1.setCampaignName("Brand-4");
@@ -74,6 +75,7 @@ class RecordRestorationIntegrationTest {
         Optional<EffectiveRecord> effectiveV1 = effectiveRecordRepository.findByIdentityKey(identityKey);
         assertThat(effectiveV1).isPresent();
         assertThat(effectiveV1.get().getBatchId()).isEqualTo(batch1.getId());
+        assertThat(effectiveV1.get().getCampaignIdentityKey()).isEqualTo("GOOGLE_ADS:NAME:brand-4");
         assertThat(effectiveV1.get().getSpend()).isEqualByComparingTo("1000.00");
         assertThat(effectiveV1.get().getClicks()).isEqualTo(50L);
 
@@ -87,6 +89,7 @@ class RecordRestorationIntegrationTest {
 
         ImportedRecord record2 = new ImportedRecord();
         record2.setBatch(batch2);
+        record2.setCampaignIdentityKey("GOOGLE_ADS:NAME:brand-4");
         record2.setIdentityKey(identityKey);
         record2.setPlatform("GOOGLE_ADS");
         record2.setCampaignName("Brand-4");

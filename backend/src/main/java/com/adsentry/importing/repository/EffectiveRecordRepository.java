@@ -13,5 +13,7 @@ public interface EffectiveRecordRepository extends JpaRepository<EffectiveRecord
     List<EffectiveRecord> findByReportingDateBetween(LocalDate startDate, LocalDate endDate);
     List<EffectiveRecord> findByPlatformAndReportingDateBetween(String platform, LocalDate startDate, LocalDate endDate);
     Optional<EffectiveRecord> findByIdentityKey(String identityKey);
+    List<EffectiveRecord> findByCampaignIdentityKey(String campaignIdentityKey);
+    List<EffectiveRecord> findByCampaignIdentityKeyAndReportingDateBetween(String campaignIdentityKey, LocalDate startDate, LocalDate endDate);
     List<EffectiveRecord> findByBatchId(Long batchId);
 }
