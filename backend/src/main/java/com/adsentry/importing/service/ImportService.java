@@ -61,6 +61,7 @@ public class ImportService {
     private final ImportRowErrorRepository rowErrorRepository;
     private final EffectiveRecordRepository effectiveRecordRepository;
     private final ObjectMapper objectMapper;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     public ImportService(CsvParser csvParser,
                          ColumnMapper columnMapper,
@@ -71,7 +72,8 @@ public class ImportService {
                          ImportedRecordRepository recordRepository,
                          ImportRowErrorRepository rowErrorRepository,
                          EffectiveRecordRepository effectiveRecordRepository,
-                         ObjectMapper objectMapper) {
+                         ObjectMapper objectMapper,
+                         org.springframework.context.ApplicationEventPublisher eventPublisher) {
         this.csvParser = csvParser;
         this.columnMapper = columnMapper;
         this.currencyService = currencyService;
@@ -82,6 +84,7 @@ public class ImportService {
         this.rowErrorRepository = rowErrorRepository;
         this.effectiveRecordRepository = effectiveRecordRepository;
         this.objectMapper = objectMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -151,6 +154,11 @@ public class ImportService {
 
         batch = batchRepository.save(batch);
 
+        batchRepository.flush();
+        recordRepository.flush();
+
+        eventPublisher.publishEvent(new com.adsentry.recommendation.event.AnalysisRecalculationEvent("IMPORT_COMPLETED"));
+
         return mapToResponse(batch, rowsResult.sampleErrors);
     }
 
@@ -216,6 +224,11 @@ public class ImportService {
 
         batch = batchRepository.save(batch);
 
+        batchRepository.flush();
+        recordRepository.flush();
+
+        eventPublisher.publishEvent(new com.adsentry.recommendation.event.AnalysisRecalculationEvent("BATCH_REPLACED"));
+
         return mapToResponse(batch, rowsResult.sampleErrors);
     }
 
@@ -228,6 +241,11 @@ public class ImportService {
         recordRepository.deleteByBatchId(batchId);
         rowErrorRepository.deleteByBatchId(batchId);
         batchRepository.delete(batch);
+
+        batchRepository.flush();
+        recordRepository.flush();
+
+        eventPublisher.publishEvent(new com.adsentry.recommendation.event.AnalysisRecalculationEvent("BATCH_DELETED"));
     }
 
     @Transactional(readOnly = true)

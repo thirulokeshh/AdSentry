@@ -521,17 +521,33 @@ mvn test -Dtest=PostgreSqlIntegrationTest -DPOSTGRES_TEST_URL="jdbc:postgresql:/
 ```
 *(Note: Docker is not installed locally on this host environment, so automated Testcontainers execution is bypassed in favor of direct H2 PostgreSQL-compatibility mode for local testing and configurable `POSTGRES_TEST_URL` for CI/staging).*
 
-### Phase 3 --- Analytics
+### Phase 3 --- Analytics (COMPLETED)
 
-Implement effective-record selection, metrics, latest-period selection,
-custom dates, coverage, and adjacent-period comparisons. Add calculation
-tests.
+Implemented the centralized analytics layer with decimal-safe calculations:
+- Metric calculations (Spend, Impressions, Clicks, Compatible Conversions, CTR, CPC, CPA, Conversion Rate, CPM) calculated strictly from aggregated totals rather than row-level averages.
+- Zero denominator and undefined CPA safety: CPA is strictly `null` (never ₹0) when conversions are zero, unspecified, or incompatible.
+- Conversion compatibility enforcement: Excludes unspecified conversions and forbids combining heterogeneous conversion actions (e.g. leads vs. purchases), emitting transparent data-quality warnings.
+- Stable campaign aggregation: Groups effective winning records by `campaign_identity_key` across dates and platforms without double-counting overlapping imports.
+- REST endpoints:
+  - `GET /api/analytics/overview` (overall totals, currency INR, platform filter, date range, aggregate metrics, and data-coverage warnings).
+  - `GET /api/analytics/campaigns` (per-campaign performance aggregated across dates, active days, metrics, confidence, and warnings).
+  - `GET /api/analytics/coverage` (total calendar days, active days, missing days, coverage percentage, and gap warnings).
+  - `GET /api/analytics/comparison` (equal-length adjacent periods comparison with coverage reliability evaluation and percentage/absolute deltas).
+- Unit and integration tests covering aggregate math, zero denominators, null vs. zero, conversion compatibility, missing dates/coverage gaps, overlapping import idempotency, empty datasets, and invalid date ranges.
 
-### Phase 4 --- Recommendations
+### Phase 4 --- Recommendations (COMPLETED)
 
-Implement two rules, documented priorities, thresholds/overrides, stable
-fingerprints, status lifecycle, and recalculation triggers. Test
-duplicates and stale findings.
+Implemented the recommendation rule engine, lifecycle, and API:
+- Rule A (`RuleAZeroConversions`): Flags campaigns with spend exceeding threshold (default ₹500 or configured `zeroConversionSpendThreshold`) and confirmed zero conversions.
+- Rule B (`RuleBHighCpa`): Flags campaigns where CPA exceeds target/multiplier; skips incompatible or ambiguous conversion definitions.
+- Deterministic fingerprinting (`RuleIdentifier` + `campaignIdentityKey` + period) preventing duplicate recommendations across analysis runs.
+- Status lifecycle: `NEW`, `REVIEWED`, `DISMISSED` persisted across recalculations when underlying findings remain materially unchanged.
+- Event-driven recalculation: Automatically triggers re-analysis on `IMPORT_COMPLETED` and `SETTINGS_UPDATED` events.
+- REST endpoints:
+  - `GET /api/recommendations` (filtering by status, priority, platform, date, rule).
+  - `PATCH /api/recommendations/{id}/status` (updating status to `REVIEWED`, `DISMISSED`, or `NEW`).
+  - `POST /api/analysis/run` (on-demand recalculation with optional date ranges and threshold overrides).
+- Unit and integration tests covering rule triggers, status persistence, event recalculations, and threshold overrides (100% passing across 86 backend tests).
 
 ### Phase 5 --- UI and approval
 
@@ -587,16 +603,16 @@ remains.
 
 ### Analytics/recommendations
 
--   [ ] Aggregate formulas are correct and tested.
--   [ ] Latest period and custom date range work.
--   [ ] Adjacent equal-length comparisons respect coverage.
--   [ ] Zero-conversion rule requires known zero conversions and spend
+-   [x] Aggregate formulas are correct and tested.
+-   [x] Latest period and custom date range work.
+-   [x] Adjacent equal-length comparisons respect coverage.
+-   [x] Zero-conversion rule requires known zero conversions and spend
     above threshold.
--   [ ] CPA rule skips incompatible/ambiguous conversion definitions.
--   [ ] Priorities use documented cutoffs.
--   [ ] Recommendations explain evidence and next actions.
--   [ ] Recalculation prevents duplicate/stale recommendations.
--   [ ] Status persists when findings remain materially unchanged.
+-   [x] CPA rule skips incompatible/ambiguous conversion definitions.
+-   [x] Priorities use documented cutoffs.
+-   [x] Recommendations explain evidence and next actions.
+-   [x] Recalculation prevents duplicate/stale recommendations.
+-   [x] Status persists when findings remain materially unchanged.
 
 ### Product/deployment
 

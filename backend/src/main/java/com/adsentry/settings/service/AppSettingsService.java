@@ -20,9 +20,12 @@ public class AppSettingsService {
     public static final String KEY_PRIORITY_HIGH_CPA_MULTIPLIER = "priority_high_cpa_multiplier";
 
     private final AppSettingRepository settingRepository;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
-    public AppSettingsService(AppSettingRepository settingRepository) {
+    public AppSettingsService(AppSettingRepository settingRepository,
+                              org.springframework.context.ApplicationEventPublisher eventPublisher) {
         this.settingRepository = settingRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -57,6 +60,10 @@ public class AppSettingsService {
         if (dto.getPriorityHighCpaMultiplier() != null) {
             saveSetting(KEY_PRIORITY_HIGH_CPA_MULTIPLIER, dto.getPriorityHighCpaMultiplier().toPlainString(), "Configured high priority CPA multiplier");
         }
+
+        settingRepository.flush();
+
+        eventPublisher.publishEvent(new com.adsentry.recommendation.event.AnalysisRecalculationEvent("SETTINGS_UPDATED"));
 
         return getSettings();
     }
